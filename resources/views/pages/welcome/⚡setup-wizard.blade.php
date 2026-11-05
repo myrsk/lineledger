@@ -1103,6 +1103,7 @@ new #[Layout('layouts.onboarding'), Title('Setup your organization')] class exte
                             <flux:select.option value="CAD">CAD &mdash; Canadian Dollar</flux:select.option>
                             <flux:select.option value="USD">USD &mdash; United States Dollar</flux:select.option>
                             <flux:select.option value="GBP">GBP &mdash; British Pound</flux:select.option>
+                            <flux:select.option value="AED">AED &mdash; UAE Dirham</flux:select.option>
                         </flux:select>
 
                         <flux:select wire:model="timezone" :label="__('Timezone')" data-test="wizard-timezone">

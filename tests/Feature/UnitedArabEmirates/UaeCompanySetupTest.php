@@ -209,6 +209,23 @@ it('suggests AED and a calendar fiscal year when the owner picks the UAE', funct
         ->assertSet('fiscalYearStartMonth', 1);
 });
 
+it('offers AED in the base currency dropdowns', function () {
+    uaeOnboardingUser();
+
+    Livewire::test('pages::welcome.setup-wizard')
+        ->set('country', 'AE')
+        ->assertSeeHtml('value="AED"')
+        ->assertSee('UAE Dirham');
+
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    Livewire::test('pages::companies.index')
+        ->assertSeeHtml('value="AED"')
+        ->set('country', 'AE')
+        ->assertSet('currency', 'AED');
+});
+
 it('prefills the UAE from Cloudflare geolocation', function () {
     uaeOnboardingUser();
 
