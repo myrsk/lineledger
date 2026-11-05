@@ -22,7 +22,7 @@ final class ColumnMappingDetector
     private const DESCRIPTION = ['description', 'memo', 'payee', 'details', 'narrative', 'transaction', 'name', 'particulars', 'merchant', 'note'];
 
     /** @var list<string> */
-    private const AMOUNT = ['amount', 'transaction amount', 'value', 'amount (cad)', 'amount (usd)', 'net amount'];
+    private const AMOUNT = ['amount', 'transaction amount', 'value', 'amount (cad)', 'amount (usd)', 'amount (aed)', 'net amount'];
 
     /** Money OUT of the account (a credit to an asset bank in the ledger). */
     private const DEBIT = ['debit', 'withdrawal', 'withdrawals', 'money out', 'paid out', 'payment', 'payments', 'debit amount', 'withdrawal amount', 'funds out', 'outflow'];

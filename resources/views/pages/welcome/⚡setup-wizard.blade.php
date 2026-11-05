@@ -184,7 +184,7 @@ new #[Layout('layouts.onboarding'), Title('Setup your organization')] class exte
         // Prefill the country from Cloudflare's edge geolocation header when the
         // app is fronted by Cloudflare. Only our supported jurisdictions are
         // honoured; anything else falls back to a confident national-TLD host
-        // signal (.ca → Canada, .uk → United Kingdom). A non-matching host
+        // signal (.ca → Canada, .uk → United Kingdom, .ae → United Arab Emirates). A non-matching host
         // (self-hosted .com, localhost) is not evidence of the US, so it leaves
         // the field blank for the owner to pick explicitly. Country is immutable
         // after creation.
@@ -192,12 +192,14 @@ new #[Layout('layouts.onboarding'), Title('Setup your organization')] class exte
             'CA' => Country::Canada,
             'US' => Country::UnitedStates,
             'GB' => Country::UnitedKingdom,
+            'AE' => Country::UnitedArabEmirates,
             default => null,
         };
 
         $hostCountry = match (Country::fromHost(request()->getHost())) {
             Country::Canada => Country::Canada,
             Country::UnitedKingdom => Country::UnitedKingdom,
+            Country::UnitedArabEmirates => Country::UnitedArabEmirates,
             default => null,
         };
 
@@ -279,6 +281,7 @@ new #[Layout('layouts.onboarding'), Title('Setup your organization')] class exte
             Country::Canada => 'CAD',
             Country::UnitedStates => 'USD',
             Country::UnitedKingdom => 'GBP',
+            Country::UnitedArabEmirates => 'AED',
             default => '',
         };
     }
@@ -303,7 +306,7 @@ new #[Layout('layouts.onboarding'), Title('Setup your organization')] class exte
             2 => ['label' => __('Organization')],
             3 => ['label' => __('Industry & accounts')],
             4 => ['label' => __('Features')],
-            5 => ['label' => $this->countryEnum() === Country::UnitedKingdom ? __('VAT') : __('Sales tax')],
+            5 => ['label' => $this->countryEnum()?->usesVat() ? __('VAT') : __('Sales tax')],
             6 => ['label' => __('How to start')],
             7 => ['label' => __('Review accounts')],
             8 => ['label' => __('Confirm')],
@@ -1316,7 +1319,7 @@ new #[Layout('layouts.onboarding'), Title('Setup your organization')] class exte
 
                 {{-- Step 5 — Sales tax --}}
                 @if ($this->step === 5)
-                    @if ($this->countryEnum() === Country::UnitedKingdom)
+                    @if ($this->countryEnum()?->usesVat())
                         <flux:heading size="lg" class="mb-4">{{ __('Are you VAT-registered?') }}</flux:heading>
                     @else
                         <flux:heading size="lg" class="mb-4">{{ __('Do you charge sales tax?') }}</flux:heading>
@@ -1324,6 +1327,8 @@ new #[Layout('layouts.onboarding'), Title('Setup your organization')] class exte
                     <div class="space-y-5">
                         @if ($this->countryEnum() === Country::UnitedKingdom)
                             <flux:switch wire:model.live="chargesTax" :label="__('I’m VAT-registered and charge VAT')" :description="__('We will add a VAT Payable account, HMRC as your VAT agency, and standard (20%), reduced (5%), zero-rated and exempt codes. Leave this off if you are not registered for VAT.')" data-test="wizard-charges-tax" />
+                        @elseif ($this->countryEnum() === Country::UnitedArabEmirates)
+                            <flux:switch wire:model.live="chargesTax" :label="__('I’m VAT-registered and charge VAT')" :description="__('We will add a VAT Payable account, the Federal Tax Authority as your VAT agency, and standard-rated (5%), zero-rated, exempt and out-of-scope codes. Leave this off if you are not registered for VAT.')" data-test="wizard-charges-tax" />
                         @else
                             <flux:switch wire:model.live="chargesTax" :label="__('I charge :tax', ['tax' => $this->countryEnum()?->taxLabel() ?? __('sales tax')])" data-test="wizard-charges-tax" />
                         @endif

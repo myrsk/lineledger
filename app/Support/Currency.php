@@ -44,6 +44,10 @@ final class Currency
         'SEK' => ['name' => 'Swedish Krona', 'symbol' => 'kr', 'decimals' => 2],
         'NOK' => ['name' => 'Norwegian Krone', 'symbol' => 'kr', 'decimals' => 2],
         'DKK' => ['name' => 'Danish Krone', 'symbol' => 'kr', 'decimals' => 2],
+        // The ISO code, not د.إ or the 2025 dirham sign (U+20C3): most fonts
+        // and the PDF renderer can't draw those yet, and "AED" is how UAE
+        // invoices are commonly written anyway.
+        'AED' => ['name' => 'UAE Dirham', 'symbol' => 'AED', 'decimals' => 2],
     ];
 
     public static function isKnown(string $code): bool

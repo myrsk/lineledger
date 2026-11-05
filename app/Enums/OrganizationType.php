@@ -24,6 +24,18 @@ enum OrganizationType: string
 
     public function label(?Country $country = null): string
     {
+        if ($country === Country::UnitedArabEmirates) {
+            return match ($this) {
+                self::SoleProprietorship => __('Sole establishment'),
+                self::Partnership => __('Partnership / civil company'),
+                self::Corporation => __('LLC or free zone company'),
+                self::Club => __('Club / Association'),
+                self::NonProfit => __('Non-profit'),
+                self::Charity => __('Charity'),
+                self::Other => __('Other / None'),
+            };
+        }
+
         if ($country === Country::UnitedKingdom) {
             return match ($this) {
                 self::SoleProprietorship => __('Sole trader'),
@@ -49,6 +61,15 @@ enum OrganizationType: string
 
     public function description(?Country $country = null): string
     {
+        if ($country === Country::UnitedArabEmirates) {
+            return match ($this) {
+                self::SoleProprietorship => __('A business owned by one person under a trade licence in their own name.'),
+                self::Partnership => __('A partnership or civil company owned by two or more partners.'),
+                self::Corporation => __('A limited liability company (LLC), or a free zone company (FZE, FZ-LLC, FZCO), with one or more shareholders.'),
+                default => $this->description(),
+            };
+        }
+
         if ($country === Country::UnitedKingdom) {
             return match ($this) {
                 self::SoleProprietorship => __('An unincorporated business run by one person (a sole trader).'),

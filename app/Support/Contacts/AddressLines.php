@@ -36,7 +36,7 @@ final class AddressLines
     {
         $value = static fn (string $key): string => trim((string) ($parts[$key] ?? ''));
 
-        $cityLine = collect([$value('city'), self::region($value('region'), $value('country'), $company)])
+        $cityLine = collect([$value('city'), self::region($value('region'), $value('country'), $company, $value('city'))])
             ->filter()
             ->implode(', ');
 
@@ -68,7 +68,7 @@ final class AddressLines
             $value('line1'),
             $value('line2'),
             $value('city'),
-            self::region($value('region'), $value('country'), $company),
+            self::region($value('region'), $value('country'), $company, $value('city')),
             $value('postal_code'),
             self::countryLine($value('country'), $company),
         ])->reject(static fn (string $part): bool => $part === '')->implode(', ');
@@ -82,23 +82,30 @@ final class AddressLines
     {
         return collect([
             trim((string) $city),
-            self::region(trim((string) $region), trim((string) $country), $company),
+            self::region(trim((string) $region), trim((string) $country), $company, $city),
             trim((string) $postalCode),
         ])->reject(static fn (string $part): bool => $part === '')->implode($glue);
     }
 
     /**
      * The region as it prints in an address: blank for a UK address, whose
-     * stored region is its nation. An address with no country of its own takes
-     * the company's.
+     * stored region is its nation; the emirate's name for a UAE address
+     * ("Al Ain, Abu Dhabi"), left out when it repeats the city ("Dubai"). An
+     * address with no country of its own takes the company's.
      */
-    public static function region(?string $region, ?string $country, ?Company $company): string
+    public static function region(?string $region, ?string $country, ?Company $company, ?string $city = null): string
     {
         $region = trim((string) $region);
         $code = mb_strtoupper(trim((string) $country));
 
         if ($code === '' && $company !== null) {
             $code = $company->jurisdiction->value;
+        }
+
+        if ($code === Country::UnitedArabEmirates->value) {
+            $name = Country::UnitedArabEmirates->regions()[mb_strtoupper($region)] ?? $region;
+
+            return mb_strtolower(trim((string) $city)) === mb_strtolower($name) ? '' : $name;
         }
 
         return $code === Country::UnitedKingdom->value ? '' : $region;

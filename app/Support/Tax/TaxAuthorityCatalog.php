@@ -17,7 +17,8 @@ use App\Models\Company;
  * sales tax ({@see ProvincialSalesTax}); the United States lists each state's
  * department of revenue; the United Kingdom lists HM Revenue & Customs and the
  * Isle of Man Customs and Excise Division, which runs VAT for Manx businesses
- * inside the same UK VAT area.
+ * inside the same UK VAT area; the United Arab Emirates lists the Federal Tax
+ * Authority, which administers VAT for all seven emirates.
  * Entries the company already has an agency for are filtered out by the caller,
  * so a company never sees a duplicate it can't use.
  */
@@ -37,6 +38,7 @@ final class TaxAuthorityCatalog
             Country::Canada => self::canada(),
             Country::UnitedStates => self::unitedStates(),
             Country::UnitedKingdom => self::unitedKingdom(),
+            Country::UnitedArabEmirates => self::unitedArabEmirates(),
         };
     }
 
@@ -94,6 +96,20 @@ final class TaxAuthorityCatalog
             [
                 'key' => 'IOM-CE',
                 'name' => 'Isle of Man Customs and Excise',
+                'account_name' => 'VAT Payable',
+            ],
+        ];
+    }
+
+    /**
+     * @return list<array{key: string, name: string, account_name: string}>
+     */
+    private static function unitedArabEmirates(): array
+    {
+        return [
+            [
+                'key' => 'FTA',
+                'name' => 'Federal Tax Authority',
                 'account_name' => 'VAT Payable',
             ],
         ];

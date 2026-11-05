@@ -306,6 +306,7 @@ class CheckStorageConfigCommand extends Command
         $expected = match (strtoupper((string) config('app.region'))) {
             'CA' => 'ca-central-1',
             'GB' => 'eu-west-2',
+            'AE' => 'me-central-1', // AWS Middle East (UAE)
             default => null, // US has several equally valid regions; nothing to assert.
         };
 

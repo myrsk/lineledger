@@ -77,7 +77,7 @@ final class MerchantKey
 
     private static function stripAmounts(string $text): string
     {
-        $text = (string) preg_replace('/(?:cad|usd|c\$|us\$|\$)\s?-?\d[\d,]*(?:\.\d{2})?/u', ' ', $text);
+        $text = (string) preg_replace('/(?:cad|usd|aed|c\$|us\$|\$)\s?-?\d[\d,]*(?:\.\d{2})?/u', ' ', $text);
 
         return (string) preg_replace('/-?\b\d[\d,]*\.\d{2}\b/u', ' ', $text);
     }

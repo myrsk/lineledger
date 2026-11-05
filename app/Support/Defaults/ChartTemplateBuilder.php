@@ -288,6 +288,7 @@ class ChartTemplateBuilder
                     Country::Canada => 'Common Shares',
                     Country::UnitedKingdom => 'Ordinary Shares',
                     Country::UnitedStates => 'Common Stock',
+                    Country::UnitedArabEmirates => 'Share Capital',
                 }, AccountSubtype::Equity],
                 '3200' => ['Shareholder Distributions', AccountSubtype::Equity],
             ],

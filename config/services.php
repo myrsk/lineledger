@@ -37,7 +37,9 @@ return [
 
     'exchange_rates' => [
         'driver' => env('EXCHANGE_RATE_DRIVER', 'frankfurter'),
-        'base_url' => env('FRANKFURTER_BASE_URL', 'https://api.frankfurter.dev/v1'),
+        // v2 blends many central banks' rates, so it covers currencies the ECB
+        // does not publish (AED, …). A URL ending in /v1 uses the ECB-only API.
+        'base_url' => env('FRANKFURTER_BASE_URL', 'https://api.frankfurter.dev/v2'),
 
         // Freshness monitoring (rates:health command + /health/fx endpoint).
         // The daily fetch runs at 06:00 and advances fetched_at every day, so a

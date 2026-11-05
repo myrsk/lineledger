@@ -7,6 +7,7 @@ use App\Support\Defaults\AmericanDefaults;
 use App\Support\Defaults\BritishDefaults;
 use App\Support\Defaults\CanadianDefaults;
 use App\Support\Defaults\CompanyDefaults;
+use App\Support\Defaults\EmiratiDefaults;
 
 /**
  * The legal jurisdiction a company operates under. Set once at creation and
@@ -22,6 +23,7 @@ enum Country: string
     case Canada = 'CA';
     case UnitedStates = 'US';
     case UnitedKingdom = 'GB';
+    case UnitedArabEmirates = 'AE';
 
     public function label(): string
     {
@@ -29,6 +31,7 @@ enum Country: string
             self::Canada => 'Canada',
             self::UnitedStates => 'United States',
             self::UnitedKingdom => 'United Kingdom',
+            self::UnitedArabEmirates => 'United Arab Emirates',
         };
     }
 
@@ -41,13 +44,14 @@ enum Country: string
             self::Canada => '🇨🇦',
             self::UnitedStates => '🇺🇸',
             self::UnitedKingdom => '🇬🇧',
+            self::UnitedArabEmirates => '🇦🇪',
         };
     }
 
     /**
      * Resolve the deployment's country from its request host: a `.ca` apex maps
-     * to Canada, a `.uk` apex (including `.co.uk`) to the United Kingdom, and
-     * anything else (`.com`, `localhost`, …) to the United States.
+     * to Canada, a `.uk` apex (including `.co.uk`) to the United Kingdom, an
+     * `.ae` apex to the United Arab Emirates, and anything else (`.com`, `localhost`, …) to the United States.
      */
     public static function fromHost(?string $host): self
     {
@@ -61,6 +65,10 @@ enum Country: string
             return self::UnitedKingdom;
         }
 
+        if (str_ends_with($host, '.ae')) {
+            return self::UnitedArabEmirates;
+        }
+
         return self::UnitedStates;
     }
 
@@ -70,6 +78,7 @@ enum Country: string
             self::Canada => 'CAD',
             self::UnitedStates => 'USD',
             self::UnitedKingdom => 'GBP',
+            self::UnitedArabEmirates => 'AED',
         };
     }
 
@@ -110,6 +119,8 @@ enum Country: string
                 default => 'America/New_York',
             },
             self::UnitedKingdom => 'Europe/London',
+            // One zone for all seven emirates; no daylight saving.
+            self::UnitedArabEmirates => 'Asia/Dubai',
         };
     }
 
@@ -159,6 +170,8 @@ enum Country: string
                 'Europe/Belfast' => 'NIR',
                 default => null,
             },
+            // Asia/Dubai covers all seven emirates — do not guess.
+            self::UnitedArabEmirates => null,
         };
 
         // Never return a code we don't actually offer as a selectable option.
@@ -171,6 +184,7 @@ enum Country: string
             self::Canada => __('Province'),
             self::UnitedStates => __('State'),
             self::UnitedKingdom => __('Nation'),
+            self::UnitedArabEmirates => __('Emirate'),
         };
     }
 
@@ -179,7 +193,9 @@ enum Country: string
         return match ($this) {
             self::Canada => __('Postal Code'),
             self::UnitedStates => __('ZIP Code'),
+            // The UAE has no postcodes; addresses use a P.O. Box.
             self::UnitedKingdom => __('Postcode'),
+            self::UnitedArabEmirates => __('P.O. Box'),
         };
     }
 
@@ -188,7 +204,19 @@ enum Country: string
         return match ($this) {
             self::Canada => __('GST/HST'),
             self::UnitedStates => __('Sales Tax'),
-            self::UnitedKingdom => __('VAT'),
+            self::UnitedKingdom, self::UnitedArabEmirates => __('VAT'),
+        };
+    }
+
+    /**
+     * Whether this jurisdiction's sales tax is a VAT (UK, UAE): drives the
+     * "VAT" wording in the wizard, tax-code settings and sales-tax report.
+     */
+    public function usesVat(): bool
+    {
+        return match ($this) {
+            self::UnitedKingdom, self::UnitedArabEmirates => true,
+            self::Canada, self::UnitedStates => false,
         };
     }
 
@@ -202,13 +230,14 @@ enum Country: string
             self::Canada => __('GST/HST account number'),
             self::UnitedStates => __('Sales tax account number'),
             self::UnitedKingdom => __('VAT registration number'),
+            self::UnitedArabEmirates => __('Tax Registration Number (TRN)'),
         };
     }
 
     /**
      * Short name for tax paid on purchases that a return claims back: an
      * input tax credit (ITC) in Canada — the term the app has always used, so
-     * the US keeps it too — and input VAT in the UK. Untranslated: it heads
+     * the US keeps it too — and input VAT in the UK and the UAE. Untranslated: it heads
      * CSV/XLSX exports and report PDFs, which stay English. On screen, use the
      * translated labels below.
      */
@@ -216,7 +245,7 @@ enum Country: string
     {
         return match ($this) {
             self::Canada, self::UnitedStates => 'ITC',
-            self::UnitedKingdom => 'Input VAT',
+            self::UnitedKingdom, self::UnitedArabEmirates => 'Input VAT',
         };
     }
 
@@ -227,7 +256,7 @@ enum Country: string
     {
         return match ($this) {
             self::Canada, self::UnitedStates => __('Paid (ITC)'),
-            self::UnitedKingdom => __('Paid (Input VAT)'),
+            self::UnitedKingdom, self::UnitedArabEmirates => __('Paid (Input VAT)'),
         };
     }
 
@@ -238,7 +267,7 @@ enum Country: string
     {
         return match ($this) {
             self::Canada, self::UnitedStates => __('Paid (ITC) breakdown'),
-            self::UnitedKingdom => __('Paid (Input VAT) breakdown'),
+            self::UnitedKingdom, self::UnitedArabEmirates => __('Paid (Input VAT) breakdown'),
         };
     }
 
@@ -249,7 +278,7 @@ enum Country: string
     {
         return match ($this) {
             self::Canada, self::UnitedStates => __('Paid (ITCs)'),
-            self::UnitedKingdom => __('Paid (Input VAT)'),
+            self::UnitedKingdom, self::UnitedArabEmirates => __('Paid (Input VAT)'),
         };
     }
 
@@ -260,7 +289,7 @@ enum Country: string
     {
         return match ($this) {
             self::Canada, self::UnitedStates => __('ITCs'),
-            self::UnitedKingdom => __('Input VAT'),
+            self::UnitedKingdom, self::UnitedArabEmirates => __('Input VAT'),
         };
     }
 
@@ -289,6 +318,13 @@ enum Country: string
             return null;
         }
 
+        if ($this === self::UnitedArabEmirates) {
+            // A TRN is 15 digits, often printed in groups ("100-1234-5678-9003").
+            $digits = (string) preg_replace('/[\s.\-]+/', '', $number);
+
+            return preg_match('/^\d{15}$/', $digits) === 1 ? $digits : $number;
+        }
+
         if ($this !== self::UnitedKingdom) {
             return $number;
         }
@@ -306,9 +342,18 @@ enum Country: string
      * 3 digits for government departments and health authorities. Isle of Man
      * businesses are on the same register and use the same GB format.
      * Northern Ireland traders quoting an "XI" number are accepted too.
+     *
+     * A UAE Tax Registration Number (TRN), issued by the Federal Tax
+     * Authority, is 15 digits.
      */
     public function isValidTaxNumber(?string $number): bool
     {
+        if ($this === self::UnitedArabEmirates) {
+            $number = $this->normalizeTaxNumber($number);
+
+            return $number === null || preg_match('/^\d{15}$/', $number) === 1;
+        }
+
         if ($this !== self::UnitedKingdom) {
             return true;
         }
@@ -325,13 +370,13 @@ enum Country: string
     /**
      * Short numeric date format printed on customer and vendor documents
      * (invoices, bills, statements). North America writes month first; the
-     * UK writes day first, so 03/04/2026 is 3 April there.
+     * UK and the UAE write day first, so 03/04/2026 is 3 April there.
      */
     public function shortDateFormat(): string
     {
         return match ($this) {
             self::Canada, self::UnitedStates => 'n/j/Y',
-            self::UnitedKingdom => 'd/m/Y',
+            self::UnitedKingdom, self::UnitedArabEmirates => 'd/m/Y',
         };
     }
 
@@ -339,12 +384,13 @@ enum Country: string
      * The fiscal-year start month a new company is given unless the owner
      * picks one. Canadian and US businesses mostly run calendar years; UK
      * sole traders and partnerships are taxed on the 6 April tax year, which
-     * HMRC lets them align to an April–March year.
+     * HMRC lets them align to an April–March year. UAE businesses mostly use
+     * the calendar year.
      */
     public function defaultFiscalYearStartMonth(): int
     {
         return match ($this) {
-            self::Canada, self::UnitedStates => 1,
+            self::Canada, self::UnitedStates, self::UnitedArabEmirates => 1,
             self::UnitedKingdom => 4,
         };
     }
@@ -372,6 +418,7 @@ enum Country: string
     {
         return match ($this) {
             self::UnitedKingdom => __('Company number'),
+            self::UnitedArabEmirates => __('Trade licence number'),
             default => null,
         };
     }
@@ -391,6 +438,13 @@ enum Country: string
             self::UnitedKingdom => in_array($organizationType, [
                 OrganizationType::Corporation,
                 OrganizationType::Partnership,
+            ], true),
+            // Every UAE business, a sole establishment included, trades under a
+            // licence from its emirate or free zone.
+            self::UnitedArabEmirates => in_array($organizationType, [
+                OrganizationType::SoleProprietorship,
+                OrganizationType::Partnership,
+                OrganizationType::Corporation,
             ], true),
             default => false,
         };
@@ -427,6 +481,7 @@ enum Country: string
             self::Canada => __('GST/HST No.'),
             self::UnitedStates => __('Tax No.'),
             self::UnitedKingdom => __('VAT No.'),
+            self::UnitedArabEmirates => __('TRN'),
         };
     }
 
@@ -473,6 +528,15 @@ enum Country: string
                 'NIR' => 'Northern Ireland',
                 'IM' => 'Isle of Man',
             ],
+            self::UnitedArabEmirates => [
+                'AZ' => 'Abu Dhabi',
+                'AJ' => 'Ajman',
+                'DU' => 'Dubai',
+                'FU' => 'Fujairah',
+                'RK' => 'Ras Al Khaimah',
+                'SH' => 'Sharjah',
+                'UQ' => 'Umm Al Quwain',
+            ],
         };
     }
 
@@ -483,7 +547,7 @@ enum Country: string
     public function cheque(string $form = 'singular'): string
     {
         $singular = match ($this) {
-            self::Canada, self::UnitedKingdom => 'Cheque',
+            self::Canada, self::UnitedKingdom, self::UnitedArabEmirates => 'Cheque',
             self::UnitedStates => 'Check',
         };
 
@@ -517,7 +581,7 @@ enum Country: string
             'ref' => $singular.' # or txn ref',
             'section' => $plural.' and Payments',
             'checkbook' => match ($this) {
-                self::Canada, self::UnitedKingdom => 'Chequebook view',
+                self::Canada, self::UnitedKingdom, self::UnitedArabEmirates => 'Chequebook view',
                 self::UnitedStates => 'Checkbook view',
             },
             'method' => $singular.' method',
@@ -533,12 +597,13 @@ enum Country: string
             self::Canada => new CanadianDefaults,
             self::UnitedStates => new AmericanDefaults,
             self::UnitedKingdom => new BritishDefaults,
+            self::UnitedArabEmirates => new EmiratiDefaults,
         };
     }
 
     /**
      * Country cases offered as form options, in declaration order
-     * (Canada, United States, United Kingdom).
+     * (Canada, United States, United Kingdom, United Arab Emirates).
      *
      * @return array<array{value: string, label: string}>
      */

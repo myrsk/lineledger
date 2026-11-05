@@ -42,6 +42,11 @@ final class TaxCopy
             __('Reduced VAT (5%)'),
             __('HM Revenue & Customs'),
             __('Isle of Man Customs and Excise'),
+            __('SR'),
+            __('Standard-rated VAT (5%)'),
+            __('OOS'),
+            __('Out of scope'),
+            __('Federal Tax Authority'),
         ];
     }
 }

@@ -242,7 +242,7 @@ new #[Title('Sales Tax')] class extends Component {
     <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
             <flux:heading size="xl" level="1">{{ __('Sales Tax') }}</flux:heading>
-            <flux:subheading>{{ $company->jurisdiction === \App\Enums\Country::UnitedKingdom ? __('Per-agency VAT charged on sales vs. input VAT reclaimed on purchases.') : __('Per-agency tax collected on sales vs. input tax credits claimed on purchases.') }}</flux:subheading>
+            <flux:subheading>{{ $company->jurisdiction->usesVat() ? __('Per-agency VAT charged on sales vs. input VAT reclaimed on purchases.') : __('Per-agency tax collected on sales vs. input tax credits claimed on purchases.') }}</flux:subheading>
         </div>
         <div class="flex flex-wrap items-end gap-2">
             <flux:input type="date" wire:model.live="startDate" :label="__('Start')" class="max-w-[180px]" />

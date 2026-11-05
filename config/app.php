@@ -75,8 +75,9 @@ return [
     | Country Region
     |--------------------------------------------------------------------------
     |
-    | Which country this deployment serves (CA / US / GB). In production this is
-    | normally derived from the request host (.ca → CA, .uk → GB, otherwise US),
+    | Which country this deployment serves (CA / US / GB / AE). In production this
+    | is normally derived from the request host (.ca → CA, .uk → GB, .ae → AE,
+    | otherwise US),
     | but setting APP_REGION forces it — useful on host-agnostic environments
     | like local dev (localhost). Legal links use this region; the guest
     | country-switcher banner only appears on the sibling hosts listed in
@@ -93,6 +94,7 @@ return [
         'CA' => env('APP_URL_CA', ''),
         'US' => env('APP_URL_US', ''),
         'GB' => env('APP_URL_GB', ''),
+        'AE' => env('APP_URL_AE', ''),
     ],
 
     /*
@@ -107,6 +109,8 @@ return [
         'US' => env('MARKETING_URL_US', 'https://lineledger.com'),
         // Empty until the UK marketing site is live: legal links fall back to US.
         'GB' => env('MARKETING_URL_GB', ''),
+        // Empty until a UAE marketing site is live: legal links fall back to US.
+        'AE' => env('MARKETING_URL_AE', ''),
     ],
 
     /*
