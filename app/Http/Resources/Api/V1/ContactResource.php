@@ -25,6 +25,7 @@ class ContactResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'tax_number' => $this->tax_number,
+            'currency_code' => $this->currency_code,
             'is_customer' => (bool) $this->is_customer,
             'is_vendor' => (bool) $this->is_vendor,
             'is_employee' => (bool) $this->is_employee,

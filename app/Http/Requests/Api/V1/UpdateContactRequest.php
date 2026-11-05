@@ -37,6 +37,8 @@ class UpdateContactRequest extends FormRequest
             'is_active' => ['sometimes', 'boolean'],
             'invoice_emails_enabled' => ['sometimes', 'boolean'],
             'reminder_emails_enabled' => ['sometimes', 'boolean'],
+            // A contact transacts in one currency (home or an enabled foreign one). Ignored on update once the contact has transactions.
+            'currency_code' => ['nullable', 'string', Rule::in($this->allowedCurrencyCodes($company))],
 
             'billing_address' => ['nullable', 'array'],
             'billing_address.line1' => ['nullable', 'string', 'max:255'],
@@ -59,5 +61,26 @@ class UpdateContactRequest extends FormRequest
             'default_income_account_id' => ['nullable', 'integer', $belongsToCompany('accounts')->where('is_active', true)->where('type', AccountType::Income->value)],
             'default_expense_account_id' => ['nullable', 'integer', $belongsToCompany('accounts')->where('is_active', true)->where('type', AccountType::Expense->value)],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if (is_string($this->currency_code)) {
+            $this->merge(['currency_code' => mb_strtoupper(trim($this->currency_code))]);
+        }
+    }
+
+    /**
+     * Home currency plus the company's enabled foreign currencies.
+     *
+     * @return list<string>
+     */
+    private function allowedCurrencyCodes(Company $company): array
+    {
+        return $company->currencies()
+            ->where('is_active', true)
+            ->pluck('currency_code')
+            ->map(fn ($c) => mb_strtoupper((string) $c))
+            ->all();
     }
 }
